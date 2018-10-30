@@ -52,7 +52,19 @@ export const constantRouterMap = [
         component: () => import('@/views/dashboard/index'),
         name: 'Dashboard',
         meta: { title: 'dashboard', icon: 'dashboard', noCache: true }
-      }
+      },
+      {
+        path: 'teams',
+        component: () => import('@/views/teams/index'),
+        name: 'Dashboard',
+        meta: { title: 'teams', icon: 'dashboard' }
+      },
+      {
+        path: 'interviews',
+        component: () => import('@/views/interviews/index'),
+        name: 'interviews',
+        meta: { title: 'dashboard', icon: 'dashboard', noCache: true }
+      },
     ]
   }
 ]
