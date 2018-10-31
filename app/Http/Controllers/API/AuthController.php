@@ -3,6 +3,7 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Validator;
@@ -79,4 +80,16 @@ class AuthController extends Controller
             'token' => $newToken,
         ], 200);
     }
+
+    public function getUserData(Request $request)
+    {
+        $token = $request->get('token');
+
+        $user  = JWTAuth::toUser($token);
+        return response([
+            'status' => 'success',
+            'user' => $user
+        ], 200);
+    }
+
 }

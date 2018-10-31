@@ -54,16 +54,10 @@ export const constantRouterMap = [
         meta: { title: 'dashboard', icon: 'dashboard', noCache: true }
       },
       {
-        path: 'teams',
-        component: () => import('@/views/teams/index'),
-        name: 'Dashboard',
-        meta: { title: 'teams', icon: 'dashboard' }
-      },
-      {
         path: 'interviews',
         component: () => import('@/views/interviews/index'),
         name: 'interviews',
-        meta: { title: 'dashboard', icon: 'dashboard', noCache: true }
+        meta: { title: 'interviews', icon: 'dashboard', noCache: true }
       },
     ]
   }
@@ -111,6 +105,7 @@ export const asyncRouterMap = [
     path: '/error-log',
     component: Layout,
     redirect: 'noredirect',
+    meta: { roles:['admin'] },
     children: [
       {
         path: 'log',

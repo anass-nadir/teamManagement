@@ -13,7 +13,7 @@ return [
     */
 
     'supportsCredentials' => true,
-    'allowedOrigins' => ['http://dev.teamManagement.com','http://localhost'],
+    'allowedOrigins' => ['http://dev.teamManagement.com','http://localhost:8080'],
     'allowedOriginsPatterns' => [],
     'allowedHeaders' => ['*'],
     'allowedMethods' => ['*'],

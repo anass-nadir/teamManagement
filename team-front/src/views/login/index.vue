@@ -8,15 +8,15 @@
         <lang-select class="set-language"/>
       </div>
 
-      <el-form-item prop="username">
+<el-form-item prop="email">
         <span class="svg-container">
-          <svg-icon icon-class="user" />
+          <svg-icon icon-class="email" />
         </span>
         <el-input
-          v-model="loginForm.username"
-          :placeholder="$t('login.username')"
-          name="username"
-          type="text"
+          v-model="loginForm.email"
+          :placeholder="$t('login.email')"
+          name="email"
+          type="email"
           auto-complete="on"
         />
       </el-form-item>
@@ -39,41 +39,23 @@
 
       <el-button :loading="loading" type="primary" style="width:100%;margin-bottom:30px;" @click.native.prevent="handleLogin">{{ $t('login.logIn') }}</el-button>
 
-      <div class="tips">
-        <span>{{ $t('login.username') }} : admin</span>
-        <span>{{ $t('login.password') }} : {{ $t('login.any') }}</span>
-      </div>
-      <div class="tips">
-        <span style="margin-right:18px;">{{ $t('login.username') }} : editor</span>
-        <span>{{ $t('login.password') }} : {{ $t('login.any') }}</span>
-      </div>
-
-      <el-button class="thirdparty-button" type="primary" @click="showDialog=true">{{ $t('login.thirdparty') }}</el-button>
     </el-form>
 
-    <el-dialog :title="$t('login.thirdparty')" :visible.sync="showDialog" append-to-body>
-      {{ $t('login.thirdpartyTips') }}
-      <br>
-      <br>
-      <br>
-      <social-sign />
-    </el-dialog>
 
   </div>
 </template>
 
 <script>
-import { isvalidUsername } from '@/utils/validate'
+import { validateEmail } from '@/utils/validate'
 import LangSelect from '@/components/LangSelect'
-import SocialSign from './socialsignin'
 
 export default {
   name: 'Login',
-  components: { LangSelect, SocialSign },
+  components: { LangSelect },
   data() {
-    const validateUsername = (rule, value, callback) => {
-      if (!isvalidUsername(value)) {
-        callback(new Error('Please enter the correct user name'))
+    const validateMail = (rule, value, callback) => {
+      if (!validateEmail(value)) {
+        callback(new Error('Please enter a valid email'))
       } else {
         callback()
       }
@@ -87,11 +69,11 @@ export default {
     }
     return {
       loginForm: {
-        username: 'admin',
-        password: '1111111'
+        email:'',
+        password: ''
       },
       loginRules: {
-        username: [{ required: true, trigger: 'blur', validator: validateUsername }],
+        email: [{ required: false, trigger: 'blur', validator: validateMail }],
         password: [{ required: true, trigger: 'blur', validator: validatePassword }]
       },
       passwordType: 'password',
@@ -138,24 +120,6 @@ export default {
           return false
         }
       })
-    },
-    afterQRScan() {
-      // const hash = window.location.hash.slice(1)
-      // const hashObj = getQueryObject(hash)
-      // const originUrl = window.location.origin
-      // history.replaceState({}, '', originUrl)
-      // const codeMap = {
-      //   wechat: 'code',
-      //   tencent: 'code'
-      // }
-      // const codeName = hashObj[codeMap[this.auth_type]]
-      // if (!codeName) {
-      //   alert('第三方登录失败')
-      // } else {
-      //   this.$store.dispatch('LoginByThirdparty', codeName).then(() => {
-      //     this.$router.push({ path: '/' })
-      //   })
-      // }
     }
   }
 }

@@ -17,7 +17,7 @@ class DatabaseSeeder extends Seeder
             'firstName'=>'nadir',
             'lastName'=>'anass',
             'email' => 'anass.nadir@gmail.com',
-            'isAdmin' => 'heIS'
+            'roles' => 'admin'
         ]);
     }
 }

@@ -1,5 +1,5 @@
 var path = require('path')
-
+var webpack = require('webpack')
 function resolve(dir) {
     return path.join(__dirname, './', dir)
 }
@@ -32,5 +32,12 @@ module.exports = {
             .options({
                 symbolId: 'icon-[name]'
             })
-    }
+    },
+    configureWebpack: {
+        plugins: [
+            new webpack.DefinePlugin({
+                'process.env': require(resolve('dev.env.js'))
+              })
+        ]
+      }
 }

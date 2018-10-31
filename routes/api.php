@@ -20,7 +20,8 @@ Route::group(['prefix' => 'user'], function () {
     Route::group(['middleware' => 'jwt.auth'], function () {
         Route::post('logout', 'AuthController@logout');
     });
-    Route::get('auth/refreshToken', 'AuthController@refreshedToken');
+    Route::post('auth/refreshToken', 'AuthController@refreshedToken');
+    Route::get('getUserData', 'AuthController@getUserData');
 });
 
 Route::middleware('auth:api', function () {
