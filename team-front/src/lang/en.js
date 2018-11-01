@@ -126,7 +126,12 @@ export default {
     draft: 'Draft',
     delete: 'Delete',
     cancel: 'Cancel',
-    confirm: 'Confirm'
+    confirm: 'Confirm',
+    interview :{
+        synthesis:"Synthesis",
+        place: "Place",
+        subject:"Subject"
+    }
   },
   errorLog: {
     tips: 'Please click the bug icon in the upper right corner',

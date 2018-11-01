@@ -24,8 +24,13 @@ Route::group(['prefix' => 'user'], function () {
     Route::get('getUserData', 'AuthController@getUserData');
 });
 
-Route::middleware('auth:api', function () {
+    Route::group(['middleware' => 'jwt.auth'], function () {
+    Route::group(['prefix' => 'interview'], function () {
+        Route::get('get-all', 'InterviewsController@index');
+        Route::post('destroy', 'InterviewsController@destroy');
+        Route::post('trash', 'InterviewsController@trash');
 
+    });
 });
 
 });
