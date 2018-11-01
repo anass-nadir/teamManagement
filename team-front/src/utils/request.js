@@ -58,7 +58,7 @@ service.interceptors.response.use(
             fetchToken(response.token)
             fetchedToken = false
           }).catch((error) => {
-            store.commit('logoutUser')
+            store.commit('LogOut')
             return Promise.reject(error)
           })
         }

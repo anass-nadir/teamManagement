@@ -27,3 +27,9 @@ export function getUserData(token) {
   })
 }
 
+export function refreshToken() {
+    return request({
+      url: 'user/auth/refreshToken',
+      method: 'post'
+    })
+  }
