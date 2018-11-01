@@ -12,8 +12,8 @@ class Interview extends Model
     protected $dates = ['deleted_at'];
 
 
-    public function user()
+    public function users()
     {
-        return $this->belongsToMany('App\User');
+        return $this->belongsToMany('App\User','user_interview','interview_id','user_id');
     }
 }

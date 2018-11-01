@@ -17,26 +17,26 @@ export function fetchArticle(id) {
   })
 }
 
-export function fetchPv(pv) {
+export function draftInterview(interviewId) {
   return request({
-    url: '/article/pv',
-    method: 'get',
-    params: { pv }
-  })
-}
-
-export function createArticle(data) {
-  return request({
-    url: '/article/create',
+    url: '/interview/trash',
     method: 'post',
-    data
+    params: { interviewId }
   })
 }
+export function destroyInterview(interviewId) {
+    return request({
+      url: '/interview/destroy',
+      method: 'post',
+      params: { interviewId }
+    })
+  }
 
-export function updateArticle(data) {
-  return request({
-    url: '/article/update',
-    method: 'post',
-    data
-  })
-}
+  export function publishInterview(interviewId) {
+    return request({
+      url: '/interview/publish',
+      method: 'post',
+      params: { interviewId }
+    })
+  }
+

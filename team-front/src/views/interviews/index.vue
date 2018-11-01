@@ -47,11 +47,11 @@
       <el-table-column :label="$t('table.actions')" align="center" width="230px" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button type="primary" size="mini">{{ $t('table.edit') }}</el-button>
-          <el-button v-if="scope.row.deleted_at!=null" size="mini" type="success" @click="handleModifyStatus(scope.row,'published')">{{ $t('table.publish') }}
+          <el-button v-if="scope.row.deleted_at!=null" size="mini" type="success" @click="handlePublishInterview(scope.row)">{{ $t('table.publish') }}
           </el-button>
-          <el-button v-if="scope.row.deleted_at==null" size="mini" @click="handleModifyStatus(scope.row,'draft')">{{ $t('table.draft') }}
+          <el-button v-if="scope.row.deleted_at==null" size="mini" @click="handleDelete(scope.row)">{{ $t('table.draft') }}
           </el-button>
-          <el-button v-if="scope.row.deleted_at!=null" size="mini" type="danger" @click="handleModifyStatus(scope.row,'deleted')">{{ $t('table.delete') }}
+          <el-button v-if="scope.row.deleted_at!=null" size="mini" type="danger" @click="handleDestroy(scope.row)">{{ $t('table.delete') }}
           </el-button>
         </template>
       </el-table-column>
@@ -95,7 +95,7 @@
 </template>
 
 <script>
-import { fetchPage } from '@/api/interviews'
+import { fetchPage, draftInterview, destroyInterview, publishInterview } from '@/api/interviews'
 import waves from '@/directive/waves' // Waves directive
 import { parseTime } from '@/utils'
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
@@ -185,10 +185,10 @@ export default {
     },
     handleModifyStatus(row, status) {
       this.$message({
-        message: '操作成功',
+        message: 'Status changed successfully',
         type: 'success'
       })
-      row.status = status
+      row.deleted_at = status
     },
     sortChange(data) {
       const { prop, order } = data
@@ -273,21 +273,85 @@ export default {
       })
     }, */
     handleDelete(row) {
-      this.$notify({
-        title: '成功',
-        message: '删除成功',
+         this.listLoading = true
+      draftInterview(row.id).then(response => {
+        /* this.list = response.data.data
+        this.total = response.data.total */
+        this.handleModifyStatus(row, response.data.date)
+        // Just to simulate the time of the request
+        setTimeout(() => {
+          this.listLoading = false
+        },200)
+      }).catch((err)=> {
+          this.listLoading = false
+          this.$notify({
+        title: 'Draft Interview',
+        message: err,
+        type: 'error',
+        duration: 2000 })
+     })
+    },
+  handleDestroy(row) {
+         this.listLoading = true
+      destroyInterview(row.id).then(response => {
+       if(response.data.message=='success') {
+         setTimeout(() => {
+          this.listLoading = false
+          this.$notify({
+        title: 'Delete Interview',
+        message: 'Interview Deleted successfully',
         type: 'success',
-        duration: 2000
-      })
+        duration: 2000 })
+        },200)
+
       const index = this.list.indexOf(row)
       this.list.splice(index, 1)
+      this.total--
+      return
+
+       }
+        this.listLoading = false
+          this.$notify({
+        title: 'Delete Interview',
+        message: 'something wrong',
+        type: 'error',
+        duration: 2000 })
+     }).catch((err)=> {
+          this.listLoading = false
+          this.$notify({
+        title: 'Delete Interview',
+        message: err,
+        type: 'error',
+        duration: 2000 })
+     })
     },
-    /* handleFetchPv(pv) {
-      fetchPv(pv).then(response => {
-        this.pvData = response.data.pvData
-        this.dialogPvVisible = true
-      })
-    }, */
+
+  handlePublishInterview(row) {
+         this.listLoading = true
+      publishInterview(row.id).then(response => {
+       if(response.data.message=='success') {
+         setTimeout(() => {
+          this.listLoading = false
+          this.handleModifyStatus(row, null)
+        },200)
+      return
+
+       }
+        this.listLoading = false
+          this.$notify({
+        title: 'Publish Interview',
+        message: 'something wrong',
+        type: 'error',
+        duration: 2000 })
+     }).catch((err)=> {
+          this.listLoading = false
+          this.$notify({
+        title: 'Delete Interview',
+        message: err,
+        type: 'error',
+        duration: 2000 })
+     })
+    },
     handleDownload() {
       this.downloadLoading = true
       import('@/vendor/Export2Excel').then(excel => {

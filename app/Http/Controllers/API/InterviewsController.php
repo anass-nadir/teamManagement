@@ -13,32 +13,71 @@ class InterviewsController extends Controller
         $this->middleware('jwt.auth');
     }
 
-    public function index(Request $request)
+    public function index(Request $request,Interview $interview)
     {
+        $interview = $interview->newQuery();
+
+
         $limit = $request->get('limit');
-
         $sort = $request->get('sort');
-        if ($sort=='-id')
-            return Interview::orderBy('id', 'desc')->withTrashed()->paginate($limit);
+        $subject = $request->get('subject');
+        $place = $request->get('place');
+        $synthesis = $request->get('synthesis');
 
-        return Interview::withTrashed()->paginate($limit);
+
+        if($subject!=null) {
+
+            $interview->where('subject','LIKE',"%{$subject}%");
+        }
+
+        if($place!=null) {
+
+            $interview->where('place','LIKE',"%{$place}%");
+        }
+
+        if($synthesis!=null) {
+
+            $interview->where('synthesis','LIKE',"%{$synthesis}%");
+        }
+
+        if ($sort=='-id') {
+
+            return $interview->with('users')->orderBy('id', 'desc')->withTrashed()->paginate($limit);
+        }
+
+           return $interview->with('users')->withTrashed()->paginate($limit);
     }
     public function destroy(Request $request)
     {
-        $id = $request->get('id');
+        $id = $request->get('interviewId');
         $interview = Interview::onlyTrashed()->findOrFail($id);
         $interview->forceDelete();
 
-        return 'deleted';
+        return response(['message'=>'success'], 200)->withHeaders([
+            'Content-Type' => 'application/json'
+        ]);
     }
 
     public function trash(Request $request)
     {
-        $id = $request->get('id');
+        $id = $request->get('interviewId');
         $interview = Interview::findOrFail($id);
         $interview->delete();
 
-        return 'deleted';
+        return  response($interview->deleted_at, 200)->withHeaders([
+        'Content-Type' => 'application/json',
+    ]);
+    }
+
+    public function publish(Request $request)
+    {
+        $id = $request->get('interviewId');
+        $interview = Interview::onlyTrashed()->findOrFail($id);
+        $interview->restore();
+
+        return response(['message'=>'success'], 200)->withHeaders([
+            'Content-Type' => 'application/json'
+        ]);
     }
 
 }

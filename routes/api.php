@@ -29,6 +29,7 @@ Route::group(['prefix' => 'user'], function () {
         Route::get('get-all', 'InterviewsController@index');
         Route::post('destroy', 'InterviewsController@destroy');
         Route::post('trash', 'InterviewsController@trash');
+        Route::post('publish', 'InterviewsController@publish');
 
     });
 });
