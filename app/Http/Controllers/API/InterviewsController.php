@@ -42,10 +42,14 @@ class InterviewsController extends Controller
 
         if ($sort=='-id') {
 
-            return $interview->with('users')->orderBy('id', 'desc')->withTrashed()->paginate($limit);
+            $interviews = $interview->with('users')->orderBy('id', 'desc')->withTrashed()->paginate($limit);
         }
 
-           return $interview->with('users')->withTrashed()->paginate($limit);
+        $interviews = $interview->with('users')->withTrashed()->paginate($limit);
+
+        return response(['interviews'=>$interviews], 200)->withHeaders([
+            'Content-Type' => 'application/json'
+        ]);
     }
     public function destroy(Request $request)
     {

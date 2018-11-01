@@ -1,9 +1,9 @@
 <template>
   <div class="app-container">
     <div class="filter-container">
-      <el-input :placeholder="$t('table.interview.synthesis')" v-model="listQuery.synthesis" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter"/>
-      <el-input :placeholder="$t('table.interview.place')" v-model="listQuery.place" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter"/>
-      <el-input :placeholder="$t('table.interview.subject')" v-model="listQuery.subject" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter"/>
+      <el-input :placeholder="$t('table.member.fname')" v-model="listQuery.firstName" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter"/>
+      <el-input :placeholder="$t('table.member.lname')" v-model="listQuery.lastName" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter"/>
+      <el-input :placeholder="$t('table.member.email')" v-model="listQuery.email" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter"/>
 
       <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">{{ $t('table.search') }}</el-button>
       <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" @click="handleCreate">{{ $t('table.add') }}</el-button>
@@ -24,19 +24,19 @@
           <span>{{ scope.row.id }}</span>
         </template>
       </el-table-column>
-            <el-table-column :label="$t('table.interview.synthesis')" align="left" min-width="200px">
+            <el-table-column :label="$t('table.member.fname')" align="left" width="150px">
         <template slot-scope="scope">
-          <span>{{ scope.row.synthesis }}</span>
+          <span>{{ scope.row.firstName }}</span>
         </template>
       </el-table-column>
-       <el-table-column :label="$t('table.interview.subject')" align="left" width="150px">
+      <el-table-column :label="$t('table.member.lname')" align="left" width="150px">
         <template slot-scope="scope">
-          <span>{{ scope.row.subject }}</span>
+          <span>{{ scope.row.lastName }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('table.interview.place')" align="left" width="150px">
+       <el-table-column :label="$t('table.member.email')" align="left" min-width="200px">
         <template slot-scope="scope">
-          <span>{{ scope.row.place }}</span>
+          <span>{{ scope.row.email }}</span>
         </template>
       </el-table-column>
       <el-table-column :label="$t('table.status')" class-name="status-col" width="100px">
@@ -47,7 +47,7 @@
       <el-table-column :label="$t('table.actions')" align="center" width="230px" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button type="primary" size="mini">{{ $t('table.edit') }}</el-button>
-          <el-button v-if="scope.row.deleted_at!=null" size="mini" type="success" @click="handlePublishInterview(scope.row)">{{ $t('table.publish') }}
+          <el-button v-if="scope.row.deleted_at!=null" size="mini" type="success" @click="handlePublishMember(scope.row)">{{ $t('table.publish') }}
           </el-button>
           <el-button v-if="scope.row.deleted_at==null" size="mini" @click="handleDelete(scope.row)">{{ $t('table.draft') }}
           </el-button>
@@ -60,28 +60,20 @@
     <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getList" />
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
-      <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="70px" style="width: 400px; margin-left:50px;">
-        <el-form-item :label="$t('table.type')" prop="type">
-          <el-select v-model="temp.type" class="filter-item" placeholder="Please select">
-            <el-option v-for="item in calendarTypeOptions" :key="item.key" :label="item.display_name" :value="item.key"/>
+      <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="100px" style="width: 400px; margin-left:50px;">
+        <el-form-item :label="$t('table.member.team')" prop="team">
+          <el-select v-model="temp.team" class="filter-item" placeholder="Please select">
+            <el-option v-for="item in teams" :key="item.id" :label="item.name" :value="item.id"/>
           </el-select>
         </el-form-item>
-        <el-form-item :label="$t('table.date')" prop="timestamp">
-          <el-date-picker v-model="temp.timestamp" type="datetime" placeholder="Please pick a date"/>
+        <el-form-item :label="$t('table.member.fname')" prop="firstName">
+          <el-input v-model="temp.firstName"/>
         </el-form-item>
-        <el-form-item :label="$t('table.title')" prop="title">
-          <el-input v-model="temp.title"/>
+        <el-form-item :label="$t('table.member.lname')" prop="lastName">
+          <el-input v-model="temp.lastName"/>
         </el-form-item>
-        <el-form-item :label="$t('table.status')">
-          <el-select v-model="temp.status" class="filter-item" placeholder="Please select">
-            <el-option v-for="item in statusOptions" :key="item" :label="item" :value="item"/>
-          </el-select>
-        </el-form-item>
-        <el-form-item :label="$t('table.importance')">
-          <el-rate v-model="temp.importance" :colors="['#99A9BF', '#F7BA2A', '#FF9900']" :max="3" style="margin-top:8px;"/>
-        </el-form-item>
-        <el-form-item :label="$t('table.remark')">
-          <el-input :autosize="{ minRows: 2, maxRows: 4}" v-model="temp.remark" type="textarea" placeholder="Please input"/>
+        <el-form-item :label="$t('table.member.email')" prop="email">
+          <el-input v-model="temp.email" type="email" />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -95,10 +87,11 @@
 </template>
 
 <script>
-import { fetchPage, draftInterview, destroyInterview, publishInterview } from '@/api/interviews'
+import { fetchPage, draftMember, destroyMember, publishMember } from '@/api/members'
 import waves from '@/directive/waves' // Waves directive
 import { parseTime } from '@/utils'
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
+import { validateEmail } from '@/utils/validate'
 
 const calendarTypeOptions = [
   { key: 'CN', display_name: 'China' },
@@ -114,7 +107,7 @@ const calendarTypeKeyValue = calendarTypeOptions.reduce((acc, cur) => {
 }, {})
 
 export default {
-  name: 'Interviews',
+  name: 'Members',
   components: { Pagination },
   directives: { waves },
   filters: {
@@ -123,17 +116,25 @@ export default {
     }
   },
   data() {
+       const validateMail = (rule, value, callback) => {
+      if (!validateEmail(value)) {
+        callback(new Error('Please enter a valid email'))
+      } else {
+        callback()
+      }
+    }
     return {
       tableKey: 0,
       list: null,
+      teams: null,
       total: 0,
       listLoading: true,
       listQuery: {
         page: 1,
         limit: 20,
-        synthesis: undefined,
-        place: undefined,
-        subject: undefined,
+        firstName: undefined,
+        lastName: undefined,
+        email: undefined,
         sort: '+id'
       },
       importanceOptions: [1, 2, 3],
@@ -142,10 +143,9 @@ export default {
       statusOptions: ['published', 'draft'],
       temp: {
         id: undefined,
-        users: [],
-        synthesis: '',
-        place: '',
-        subject: '',
+        firstName: '',
+        lastName: '',
+        email: '',
         status: 'published'
       },
       dialogFormVisible: false,
@@ -154,12 +154,11 @@ export default {
         update: 'Edit',
         create: 'Create'
       },
-      dialogPvVisible: false,
-      pvData: [],
       rules: {
-        type: [{ required: true, message: 'type is required', trigger: 'change' }],
-        timestamp: [{ type: 'date', required: true, message: 'timestamp is required', trigger: 'change' }],
-        title: [{ required: true, message: 'title is required', trigger: 'blur' }]
+        team: [{ required: true, message: 'please pick up a team', trigger: 'change' }],
+        email: [{ required: true, trigger: 'blur', validator: validateMail }],
+        firstName: [{ required: true, message: 'first name is required', trigger: 'blur' }],
+        lastName: [{ required: true, message: 'last name is required', trigger: 'blur' }]
       },
       downloadLoading: false
     }
@@ -171,10 +170,9 @@ export default {
     getList() {
       this.listLoading = true
       fetchPage(this.listQuery).then(response => {
-        this.list = response.data.interviews.data
-        this.total = response.data.interviews.total
-
-        // Just to simulate the time of the request
+        this.list = response.data.members.data
+        this.total = response.data.members.total
+        // this.teams = response.data.teams
         setTimeout(() => {
           this.listLoading = false
         }, 600)
@@ -208,10 +206,9 @@ export default {
     resetTemp() {
       this.temp = {
         id: undefined,
-        users: [],
-        synthesis: '',
-        place: '',
-        subject: '',
+        firstName: '',
+        lastName: '',
+        email: '',
         status: 'published'
       }
     },
@@ -276,7 +273,7 @@ export default {
     }, */
     handleDelete(row) {
          this.listLoading = true
-      draftInterview(row.id).then(response => {
+      draftMember(row.id).then(response => {
         /* this.list = response.data.data
         this.total = response.data.total */
         this.handleModifyStatus(row, response.data.date)
@@ -287,7 +284,7 @@ export default {
       }).catch((err)=> {
           this.listLoading = false
           this.$notify({
-        title: 'Draft Interview',
+        title: 'Draft Member',
         message: err,
         type: 'error',
         duration: 2000 })
@@ -295,13 +292,13 @@ export default {
     },
   handleDestroy(row) {
          this.listLoading = true
-      destroyInterview(row.id).then(response => {
+      destroyMember(row.id).then(response => {
        if(response.data.message=='success') {
          setTimeout(() => {
           this.listLoading = false
           this.$notify({
-        title: 'Delete Interview',
-        message: 'Interview Deleted successfully',
+        title: 'Delete Member',
+        message: 'Member Deleted successfully',
         type: 'success',
         duration: 2000 })
         },200)
@@ -314,23 +311,23 @@ export default {
        }
         this.listLoading = false
           this.$notify({
-        title: 'Delete Interview',
+        title: 'Delete Member',
         message: 'something wrong',
         type: 'error',
         duration: 2000 })
      }).catch((err)=> {
           this.listLoading = false
           this.$notify({
-        title: 'Delete Interview',
+        title: 'Delete Member',
         message: err,
         type: 'error',
         duration: 2000 })
      })
     },
 
-  handlePublishInterview(row) {
+  handlePublishMember(row) {
          this.listLoading = true
-      publishInterview(row.id).then(response => {
+      publishMember(row.id).then(response => {
        if(response.data.message=='success') {
          setTimeout(() => {
           this.listLoading = false
@@ -341,14 +338,14 @@ export default {
        }
         this.listLoading = false
           this.$notify({
-        title: 'Publish Interview',
+        title: 'Publish Member',
         message: 'something wrong',
         type: 'error',
         duration: 2000 })
      }).catch((err)=> {
           this.listLoading = false
           this.$notify({
-        title: 'Delete Interview',
+        title: 'Delete Member',
         message: err,
         type: 'error',
         duration: 2000 })
@@ -357,8 +354,8 @@ export default {
     handleDownload() {
       this.downloadLoading = true
       import('@/vendor/Export2Excel').then(excel => {
-        const tHeader = ['subject', 'synthesis', 'place']
-        const filterVal = ['subject', 'synthesis', 'place']
+        const tHeader = ['email', 'firstName', 'lastName']
+        const filterVal = ['email', 'firstName', 'lastName']
         const data = this.formatJson(filterVal, this.list)
         excel.export_json_to_excel({
           header: tHeader,

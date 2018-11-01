@@ -31,13 +31,18 @@ class User extends Authenticatable
 
     public function teams()
     {
-        return $this->belongsToMany('App\Team','user_team','team_id','user_id');
+        return $this->belongsToMany('App\Team','user_team','user_id','team_id');
 
     }
 
     public function interviews()
     {
         return $this->belongsToMany('App\Interview','user_interview','user_id','interview_id');
+    }
+
+    public function scopeMembers($query)
+    {
+        return $query->where('roles', 'member');
     }
 
 }

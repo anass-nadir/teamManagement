@@ -131,6 +131,12 @@ export default {
         synthesis:"Synthesis",
         place: "Place",
         subject:"Subject"
+    },
+    member :{
+        lname:"Last Name",
+        fname: "First Name",
+        email:"email",
+        team:"Team"
     }
   },
   errorLog: {
