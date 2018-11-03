@@ -11,6 +11,9 @@ class Interview extends Model
 
     protected $dates = ['deleted_at'];
 
+    protected $fillable = [
+        'subject','place','synthesis'
+    ];
 
     public function users()
     {

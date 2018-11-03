@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Interview;
 use Illuminate\Http\Request;
+use Validator;
 
 class InterviewsController extends Controller
 {
@@ -43,6 +44,10 @@ class InterviewsController extends Controller
         if ($sort=='-id') {
 
             $interviews = $interview->with('users')->orderBy('id', 'desc')->withTrashed()->paginate($limit);
+
+            return response(['interviews'=>$interviews], 200)->withHeaders([
+                'Content-Type' => 'application/json'
+            ]);
         }
 
         $interviews = $interview->with('users')->withTrashed()->paginate($limit);
@@ -84,4 +89,44 @@ class InterviewsController extends Controller
         ]);
     }
 
+    public function addInterview(Request $request) {
+
+        $rules = [
+            'subject' => 'required',
+            'place' => 'required',
+            'synthesis' =>'required',
+            "users"    => "required|array|min:1",
+            "users.*"  => "required|array|distinct|min:1"
+        ];
+        $inputs = $request->all();
+
+        $validator = Validator::make($inputs, $rules);
+        if ($validator->fails()) {
+            $errors = $validator->messages();
+            return response()->json(['error' => $errors], 400);
+        }
+        $subject = $request->get('subject');
+        $place = $request->get('place');
+        $synthesis = $request->get('synthesis');
+        $members = $request->get('users');
+
+        $interview = new Interview([
+            'subject' => $subject,
+            'synthesis' => $synthesis,
+            'place' => $place
+        ]);
+        $interview->save();
+
+        foreach ($members as $member) {
+
+            $interview->users()->sync([$member['id']], false);
+
+        }
+
+
+        return response(['message'=>'success','interview'=>$interview->id], 200)->withHeaders([
+            'Content-Type' => 'application/json'
+        ]);
+
+    }
 }

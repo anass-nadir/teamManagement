@@ -50,6 +50,10 @@ class UsersController extends Controller
         if ($sort=='-id') {
 
             $members = $user->members()->orderBy('id', 'desc')->withTrashed()->paginate($limit);
+
+            return response(['members'=>$members], 200)->withHeaders([
+                'Content-Type' => 'application/json'
+            ]);
         }
 
            $members = $user->members()->withTrashed()->paginate($limit);
@@ -127,6 +131,15 @@ class UsersController extends Controller
             'Content-Type' => 'application/json'
         ]);
 
+    }
+
+    public function getAll() {
+
+        $members = User::members()->get();
+
+        return response(['members'=>$members], 200)->withHeaders([
+            'Content-Type' => 'application/json'
+        ]);
     }
 
 }

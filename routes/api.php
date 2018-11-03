@@ -30,16 +30,18 @@ Route::group(['prefix' => 'user'], function () {
         Route::post('destroy', 'InterviewsController@destroy');
         Route::post('trash', 'InterviewsController@trash');
         Route::post('publish', 'InterviewsController@publish');
+        Route::post('push-interview', 'InterviewsController@addInterview');
 
         });
 
         Route::group(['prefix' => 'member'], function () {
-            Route::get('get-all', 'UsersController@getMembers');
+            Route::get('get-all-filtered', 'UsersController@getMembers');
             Route::post('destroy', 'UsersController@destroy');
             Route::post('trash', 'UsersController@trash');
             Route::post('publish', 'UsersController@publish');
             Route::post('add-to-team', 'UsersController@attachMemberWithTeam');
             Route::get('get-by-team', 'UsersController@getMemberByTeam');
+            Route::get('get-all', 'UsersController@getAll');
 
         });
         Route::get('get-teams', 'UsersController@getTeams');

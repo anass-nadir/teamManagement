@@ -2,7 +2,7 @@ import request from '@/utils/request'
 
 export function fetchPage(data) {
   return request({
-    url: '/member/get-all',
+    url: '/member/get-all-filtered',
     method: 'get',
     params: { page: data.page, limit:data.limit, firstName:data.firstName,lastName:data.lastName, email:data.email, sort:data.sort  }
   })
@@ -32,3 +32,10 @@ export function destroyMember(userId) {
     })
   }
 
+  export function fetchAll() {
+    return request({
+      url: '/member/get-all',
+      method: 'get'
+    })
+
+  }

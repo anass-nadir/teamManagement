@@ -1,10 +1,18 @@
 <template>
   <div class="dndList">
-    <div :style="{width:width1}" class="dndList-list">
-      <h3>{{ list1Title }}</h3>
-      <draggable :list="list1" :options="{group:'article'}" class="dragArea">
+    <div style="width:48%" class="dndList-list">
+      <h3>Click or Drag members</h3>
+      <draggable :list="filterList2" :options="{group:'article'}" @change="listChanged" class="dragArea">
+        <div v-for="element in filterList2" :key="element.id" class="list-complete-item">
+          <div class="list-complete-item-handle2" @click="pushEle(element)"> [{{ element.firstName }}] {{ element.lastName }}</div>
+        </div>
+      </draggable>
+    </div>
+      <div style="width:48%" class="dndList-list">
+      <h3>Drop them here</h3>
+      <draggable :list="list1" :options="{group:'article'}" :style="list1.length>0?'border-color:#409EFF':'border-color:red'" class="dragArea">
         <div v-for="element in list1" :key="element.id" class="list-complete-item">
-          <div class="list-complete-item-handle">[{{ element.author }}] {{ element.title }}</div>
+          <div class="list-complete-item-handle">[{{ element.firstName }}] {{ element.lastName }}</div>
           <div style="position:absolute;right:0px;">
             <span style="float: right ;margin-top: -20px;margin-right:5px;" @click="deleteEle(element)">
               <i style="color:#ff4949" class="el-icon-delete"/>
@@ -13,52 +21,19 @@
         </div>
       </draggable>
     </div>
-    <div :style="{width:width2}" class="dndList-list">
-      <h3>{{ list2Title }}</h3>
-      <draggable :list="filterList2" :options="{group:'article'}" class="dragArea">
-        <div v-for="element in filterList2" :key="element.id" class="list-complete-item">
-          <div class="list-complete-item-handle2" @click="pushEle(element)"> [{{ element.author }}] {{ element.title }}</div>
-        </div>
-      </draggable>
-    </div>
   </div>
 </template>
 
 <script>
 import draggable from 'vuedraggable'
-
+import { fetchAll } from '@/api/members'
 export default {
-  name: 'PickMember',
   components: { draggable },
-  props: {
-    list1: {
-      type: Array,
-      default() {
-        return []
+  data() {
+      return {
+          list2 :[],
+          list1: []
       }
-    },
-    list2: {
-      type: Array,
-      default() {
-        return []
-      }
-    },
-    list1Title: {
-      type: String,
-      default: 'list1'
-    },
-    list2Title: {
-      type: String,
-      default: 'list2'
-    },
-    width1: {
-      type: String,
-      default: '48%'
-    },
-    width2: {
-      type: String,
-      default: '48%'
-    }
   },
   computed: {
     filterList2() {
@@ -69,6 +44,9 @@ export default {
         return false
       })
     }
+  },
+  created() {
+      this.getList()
   },
   methods: {
     isNotInList1(v) {
@@ -82,6 +60,7 @@ export default {
         if (item.id === ele.id) {
           const index = this.list1.indexOf(item)
           this.list1.splice(index, 1)
+          this.$emit('memberRemoved',ele)
           break
         }
       }
@@ -91,6 +70,18 @@ export default {
     },
     pushEle(ele) {
       this.list1.push(ele)
+      this.$emit('memberAdded',ele)
+    },
+    getList() {
+      fetchAll().then(response => {
+        this.list2 = response.data.members
+      })
+    },
+    listChanged (evt) {
+        if(evt.added)
+        this.$emit('memberAdded',evt.added.element)
+         else if(evt.removed)
+          this.$emit('memberRemoved',evt.removed.element)
     }
   }
 }
@@ -115,6 +106,9 @@ export default {
       margin-top: 15px;
       min-height: 50px;
       padding-bottom: 30px;
+      border: 1px solid #409EFF;
+      border-radius: 2%;
+      padding: 10px;
     }
   }
 }

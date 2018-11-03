@@ -40,3 +40,10 @@ export function destroyInterview(interviewId) {
     })
   }
 
+  export function createInterview(data) {
+    return request({
+      url: '/interview/push-interview',
+      method: 'post',
+      data
+    })
+  }

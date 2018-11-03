@@ -24,7 +24,7 @@
           <span>{{ scope.row.id }}</span>
         </template>
       </el-table-column>
-            <el-table-column :label="$t('table.interview.synthesis')" align="left" min-width="200px">
+            <el-table-column :label="$t('table.interview.synthesis')" align="left" min-width="150px">
         <template slot-scope="scope">
           <span>{{ scope.row.synthesis }}</span>
         </template>
@@ -37,6 +37,11 @@
       <el-table-column :label="$t('table.interview.place')" align="left" width="150px">
         <template slot-scope="scope">
           <span>{{ scope.row.place }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column :label="$t('table.interview.users')" align="left" width="200px">
+        <template slot-scope="scope">
+          <span v-for="(item,index) in scope.row.users" :key="index" style="display:inline-block">[{{ item.firstName }} {{ item.lastName }}]</span>
         </template>
       </el-table-column>
       <el-table-column :label="$t('table.status')" class-name="status-col" width="100px">
@@ -59,31 +64,27 @@
 
     <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getList" />
 
-    <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
-      <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="70px" style="width: 400px; margin-left:50px;">
-        <el-form-item :label="$t('table.type')" prop="type">
-          <el-select v-model="temp.type" class="filter-item" placeholder="Please select">
-            <el-option v-for="item in calendarTypeOptions" :key="item.key" :label="item.display_name" :value="item.key"/>
-          </el-select>
+    <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible" width="80%">
+        <el-row :gutter="20">
+             <el-col :span="12">
+      <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="80px" style="width: 400px; margin-left:50px;">
+
+        <el-form-item :label="$t('table.interview.subject')" prop="subject">
+          <el-input v-model="temp.subject"/>
         </el-form-item>
-        <el-form-item :label="$t('table.date')" prop="timestamp">
-          <el-date-picker v-model="temp.timestamp" type="datetime" placeholder="Please pick a date"/>
+         <el-form-item :label="$t('table.interview.synthesis')" prop="synthesis">
+          <el-input v-model="temp.synthesis"/>
         </el-form-item>
-        <el-form-item :label="$t('table.title')" prop="title">
-          <el-input v-model="temp.title"/>
+         <el-form-item :label="$t('table.interview.place')" prop="place">
+          <el-input v-model="temp.place"/>
         </el-form-item>
-        <el-form-item :label="$t('table.status')">
-          <el-select v-model="temp.status" class="filter-item" placeholder="Please select">
-            <el-option v-for="item in statusOptions" :key="item" :label="item" :value="item"/>
-          </el-select>
-        </el-form-item>
-        <el-form-item :label="$t('table.importance')">
-          <el-rate v-model="temp.importance" :colors="['#99A9BF', '#F7BA2A', '#FF9900']" :max="3" style="margin-top:8px;"/>
-        </el-form-item>
-        <el-form-item :label="$t('table.remark')">
-          <el-input :autosize="{ minRows: 2, maxRows: 4}" v-model="temp.remark" type="textarea" placeholder="Please input"/>
-        </el-form-item>
+
       </el-form>
+       </el-col>
+        <el-col :span="12">
+ <pick-member @memberAdded="memberAdded" @memberRemoved="memberRemoved" />
+             </el-col>
+      </el-row>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">{{ $t('table.cancel') }}</el-button>
         <el-button type="primary" @click="dialogStatus==='create'?createData():updateData()">{{ $t('table.confirm') }}</el-button>
@@ -95,11 +96,11 @@
 </template>
 
 <script>
-import { fetchPage, draftInterview, destroyInterview, publishInterview } from '@/api/interviews'
+import { fetchPage, draftInterview, destroyInterview, publishInterview, createInterview } from '@/api/interviews'
 import waves from '@/directive/waves' // Waves directive
 import { parseTime } from '@/utils'
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
-
+import PickMember from '@/components/PickMember'
 const calendarTypeOptions = [
   { key: 'CN', display_name: 'China' },
   { key: 'US', display_name: 'USA' },
@@ -115,7 +116,7 @@ const calendarTypeKeyValue = calendarTypeOptions.reduce((acc, cur) => {
 
 export default {
   name: 'Interviews',
-  components: { Pagination },
+  components: { Pagination, PickMember },
   directives: { waves },
   filters: {
     typeFilter(type) {
@@ -157,9 +158,9 @@ export default {
       dialogPvVisible: false,
       pvData: [],
       rules: {
-        type: [{ required: true, message: 'type is required', trigger: 'change' }],
-        timestamp: [{ type: 'date', required: true, message: 'timestamp is required', trigger: 'change' }],
-        title: [{ required: true, message: 'title is required', trigger: 'blur' }]
+        subject: [{ required: true, message: 'subject is required', trigger: 'blur' }],
+        synthesis: [{required: true, message: 'synthesis is required', trigger: 'blur' }],
+        place: [{ required: true, message: 'place is required', trigger: 'blur' }]
       },
       downloadLoading: false
     }
@@ -223,24 +224,38 @@ export default {
         this.$refs['dataForm'].clearValidate()
       })
     },
-   /*  createData() {
+    memberAdded (member) {
+     this.temp.users.push(member)
+    },
+    memberRemoved (member) {
+        this.temp.users.indexOf(member) !== -1 && this.temp.users.splice(this.temp.users.indexOf(member), 1)
+    },
+    createData() {
       this.$refs['dataForm'].validate((valid) => {
+          if(this.temp.users.length==0) {
+              this.$notify({
+              title: 'Add Interview',
+              message: 'Please pick up at least one member',
+              type: 'error',
+              duration: 2000
+            })
+            return
+          }
         if (valid) {
-          this.temp.id = parseInt(Math.random() * 100) + 1024 // mock a id
-          this.temp.author = 'vue-element-admin'
-          createArticle(this.temp).then(() => {
+          createInterview(this.temp).then((data) => {
+         this.temp.id = data.data.interview
             this.list.unshift(this.temp)
             this.dialogFormVisible = false
             this.$notify({
-              title: '成功',
-              message: '创建成功',
+              title: 'Add Interview',
+              message: 'Interview was added successfully',
               type: 'success',
               duration: 2000
             })
           })
         }
       })
-    }, */
+    },
     handleUpdate(row) {
       this.temp = Object.assign({}, row) // copy obj
       this.temp.timestamp = new Date(this.temp.timestamp)

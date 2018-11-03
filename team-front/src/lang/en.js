@@ -130,7 +130,8 @@ export default {
     interview :{
         synthesis:"Synthesis",
         place: "Place",
-        subject:"Subject"
+        subject:"Subject",
+        users: "Members"
     },
     member :{
         lname:"Last Name",
