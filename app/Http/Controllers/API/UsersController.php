@@ -11,6 +11,7 @@ use App\Http\Controllers\Controller;
 use App\Team;
 use App\User;
 use Illuminate\Http\Request;
+use Validator;
 
 class UsersController extends Controller
 {
@@ -109,25 +110,9 @@ class UsersController extends Controller
 
         $teamId = $request->get('teamId');
 
-        $users = User::members()->whereHas('teams', function($query) use ($teamId) {
-            $query->where('team_id', $teamId);
-        })->get();
+        $users = User::members()->where('team_id', $teamId)->get();
 
         return response(['members'=>$users], 200)->withHeaders([
-            'Content-Type' => 'application/json'
-        ]);
-
-    }
-    public function attachMemberWithTeam(Request $request) {
-
-        $teamId = $request->get('teamId');
-        $userId = $request->get('userId');
-
-        $member = User::members()->findOrFail($userId);
-
-        $member->teams()->sync([$teamId], false);
-
-        return response(['message'=>'attached successfully'], 200)->withHeaders([
             'Content-Type' => 'application/json'
         ]);
 
@@ -156,5 +141,90 @@ class UsersController extends Controller
         ]);
     }
 
+    public function addMember(Request $request) {
+
+        $rules = [
+            'firstName' => 'required',
+            'lastName' => 'required',
+            'email' =>'required|email|unique:users',
+            'password' => 'required|min:6',
+        ];
+
+        $inputs = $request->all();
+
+        $validator = Validator::make($inputs, $rules);
+        if ($validator->fails()) {
+            $errors = $validator->messages();
+            return response()->json(['error' => $errors], 400);
+        }
+        $firstName = $request->get('firstName');
+        $lastName = $request->get('lastName');
+        $email = $request->get('email');
+        $avatar = $request->get('avatar');
+        $team = $request->get('team_id');
+        $password =$request->get('password');
+
+        $user = new User([
+            'firstName' => $firstName,
+            'lastName' => $lastName,
+            'email' => $email,
+            'password'=>bcrypt($password),
+            'avatar' => $avatar,
+            'team_id' => $team
+        ]);
+        $user->save();
+
+
+        return response(['message'=>'success','user'=>$user->id], 200)->withHeaders([
+            'Content-Type' => 'application/json'
+        ]);
+
+    }
+
+    public function editMember(Request $request) {
+
+        $id =$request->get('id');
+        $email = $request->get('email');
+        $user = User::findOrFail($id);
+
+        $rules = [
+            'firstName' => 'required',
+            'lastName' => 'required',
+            'email' =>'required|email',
+            'password' => 'required|min:6',
+        ];
+
+        if($user->email != $email)
+            $rules['email']='required|email|unique:users';
+
+        $inputs = $request->all();
+
+        $validator = Validator::make($inputs, $rules);
+        if ($validator->fails()) {
+            $errors = $validator->messages();
+            return response()->json(['error' => $errors], 400);
+        }
+
+        $firstName = $request->get('firstName');
+        $lastName = $request->get('lastName');
+        $avatar = $request->get('avatar');
+        $team = $request->get('team_id');
+        $password =$request->get('password');
+
+        $user->firstName = $firstName;
+        $user->lastName = $lastName;
+        if($user->email != $email)
+        $user->email = $email;
+        $user->password = bcrypt($password);
+        $user->avatar = $avatar;
+        $user->team_id = $team;
+        $user->save();
+
+
+        return response(['message'=>'success','user'=>$user->id], 200)->withHeaders([
+            'Content-Type' => 'application/json'
+        ]);
+
+    }
 
 }

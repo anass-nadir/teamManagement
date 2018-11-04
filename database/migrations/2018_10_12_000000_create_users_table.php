@@ -22,6 +22,8 @@ class CreateUsersTable extends Migration
             $table->string('password');
             $table->string('roles')->default('member');
             $table->binary('avatar')->nullable();
+            $table->integer('team_id')->unsigned()->nullable();
+            $table->foreign('team_id')->references('id')->on('teams')->onDelete('cascade');
             $table->softDeletes();
             $table->rememberToken();
             $table->timestamps();

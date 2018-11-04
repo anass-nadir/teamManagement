@@ -41,10 +41,11 @@ Route::group(['prefix' => 'user'], function () {
             Route::post('destroy', 'UsersController@destroy');
             Route::post('trash', 'UsersController@trash');
             Route::post('publish', 'UsersController@publish');
-            Route::post('add-to-team', 'UsersController@attachMemberWithTeam');
             Route::get('get-by-team', 'UsersController@getMemberByTeam');
             Route::get('get-all', 'UsersController@getAll');
             Route::post('upload-avatar', 'UsersController@updateAvatar');
+            Route::post('add-member', 'UsersController@addMember');
+            Route::post('edit-member', 'UsersController@editMember');
 
 
         });

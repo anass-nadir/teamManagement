@@ -47,3 +47,26 @@ export function destroyMember(userId) {
       data: data
     })
   }
+
+  export function getTeams() {
+    return request({
+      url: '/get-teams',
+      method: 'get'
+    })
+
+  }
+
+  export function addMember(data) {
+    return request({
+      url: '/member/add-member',
+      method: 'post',
+      data: data
+    })
+  }
+  export function editMember(data) {
+    return request({
+      url: '/member/edit-member',
+      method: 'post',
+      data: data
+    })
+  }

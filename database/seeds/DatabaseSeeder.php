@@ -24,7 +24,6 @@ class DatabaseSeeder extends Seeder
             ->create()
             ->each(function($u) {
                 $u->interviews()->save(factory('App\Interview')->make());
-                $u->teams()->save(factory('App\Team')->make());
             });
     }
 }

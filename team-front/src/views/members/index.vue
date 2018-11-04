@@ -46,7 +46,7 @@
       </el-table-column>
       <el-table-column :label="$t('table.actions')" align="center" width="230px" class-name="small-padding fixed-width">
         <template slot-scope="scope">
-          <el-button type="primary" size="mini">{{ $t('table.edit') }}</el-button>
+          <el-button type="primary" size="mini" @click="handleUpdate(scope.row)">{{ $t('table.edit') }}</el-button>
           <el-button v-if="scope.row.deleted_at!=null" size="mini" type="success" @click="handlePublishMember(scope.row)">{{ $t('table.publish') }}
           </el-button>
           <el-button v-if="scope.row.deleted_at==null" size="mini" @click="handleDelete(scope.row)">{{ $t('table.draft') }}
@@ -61,8 +61,8 @@
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
       <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="100px" style="width: 400px; margin-left:50px;">
-        <el-form-item :label="$t('table.member.team')" prop="team">
-          <el-select v-model="temp.team" class="filter-item" placeholder="Please select">
+        <el-form-item :label="$t('table.member.team')" prop="team_id">
+          <el-select v-model="temp.team_id" class="filter-item" placeholder="Please select">
             <el-option v-for="item in teams" :key="item.id" :label="item.name" :value="item.id"/>
           </el-select>
         </el-form-item>
@@ -75,6 +75,10 @@
         <el-form-item :label="$t('table.member.email')" prop="email">
           <el-input v-model="temp.email" type="email" />
         </el-form-item>
+        <el-form-item :label="$t('table.member.password')" prop="password">
+          <el-input v-model="temp.password"/>
+        </el-form-item>
+        <avatar-upload :state="dialogStatus" @avatarAdded="addAvatar" :exImage="temp.avatar!=null?temp.avatar:''" />
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">{{ $t('table.cancel') }}</el-button>
@@ -87,38 +91,29 @@
 </template>
 
 <script>
-import { fetchPage, draftMember, destroyMember, publishMember } from '@/api/members'
+import { fetchPage, draftMember, destroyMember, publishMember,getTeams, addMember, editMember } from '@/api/members'
 import waves from '@/directive/waves' // Waves directive
 import { parseTime } from '@/utils'
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
 import { validateEmail } from '@/utils/validate'
+import AvatarUpload from '@/components/uploadAvatar/avatarUpload'
 
-const calendarTypeOptions = [
-  { key: 'CN', display_name: 'China' },
-  { key: 'US', display_name: 'USA' },
-  { key: 'JP', display_name: 'Japan' },
-  { key: 'EU', display_name: 'Eurozone' }
-]
-
-// arr to obj ,such as { CN : "China", US : "USA" }
-const calendarTypeKeyValue = calendarTypeOptions.reduce((acc, cur) => {
-  acc[cur.key] = cur.display_name
-  return acc
-}, {})
 
 export default {
   name: 'Members',
-  components: { Pagination },
+  components: { Pagination, AvatarUpload },
   directives: { waves },
-  filters: {
-    typeFilter(type) {
-      return calendarTypeKeyValue[type]
-    }
-  },
   data() {
        const validateMail = (rule, value, callback) => {
       if (!validateEmail(value)) {
         callback(new Error('Please enter a valid email'))
+      } else {
+        callback()
+      }
+    }
+     const validatePassword = (rule, value, callback) => {
+      if (value.length < 6) {
+        callback(new Error('The password can not be less than 6 digits'))
       } else {
         callback()
       }
@@ -137,8 +132,6 @@ export default {
         email: undefined,
         sort: '+id'
       },
-      importanceOptions: [1, 2, 3],
-      calendarTypeOptions,
       sortOptions: [{ label: 'ID Ascending', key: '+id' }, { label: 'ID Descending', key: '-id' }],
       statusOptions: ['published', 'draft'],
       temp: {
@@ -146,6 +139,10 @@ export default {
         firstName: '',
         lastName: '',
         email: '',
+        avatar:'',
+        password:'',
+        team_id:'',
+        deleted_at:null,
         status: 'published'
       },
       dialogFormVisible: false,
@@ -155,10 +152,11 @@ export default {
         create: 'Create'
       },
       rules: {
-        team: [{ required: true, message: 'please pick up a team', trigger: 'change' }],
+        team_id: [{ required: true, message: 'please pick up a team', trigger: 'blur' }],
         email: [{ required: true, trigger: 'blur', validator: validateMail }],
         firstName: [{ required: true, message: 'first name is required', trigger: 'blur' }],
-        lastName: [{ required: true, message: 'last name is required', trigger: 'blur' }]
+        lastName: [{ required: true, message: 'last name is required', trigger: 'blur' }],
+        password: [{ required: true, validator: validatePassword, trigger: 'blur' }]
       },
       downloadLoading: false
     }
@@ -167,20 +165,27 @@ export default {
     this.getList()
   },
   methods: {
-    getList() {
+   async getList() {
       this.listLoading = true
-      fetchPage(this.listQuery).then(response => {
+     await fetchPage(this.listQuery).then(response => {
         this.list = response.data.members.data
         this.total = response.data.members.total
-        // this.teams = response.data.teams
-        setTimeout(() => {
+
+         getTeams().then(response => {
+        this.teams = response.data.teams
+         setTimeout(() => {
           this.listLoading = false
         }, 600)
+         })
+
       })
     },
     handleFilter() {
       this.listQuery.page = 1
       this.getList()
+    },
+    addAvatar(avatar) {
+    this.temp.avatar = avatar
     },
     handleModifyStatus(row, status) {
       this.$message({
@@ -208,51 +213,52 @@ export default {
         id: undefined,
         firstName: '',
         lastName: '',
+        password:'',
+        team_id:'',
+        avatar:'',
         email: '',
         status: 'published'
       }
     },
     handleCreate() {
-      this.resetTemp()
+        this.resetTemp()
       this.dialogStatus = 'create'
       this.dialogFormVisible = true
       this.$nextTick(() => {
         this.$refs['dataForm'].clearValidate()
       })
     },
-   /*  createData() {
+    createData() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          this.temp.id = parseInt(Math.random() * 100) + 1024 // mock a id
-          this.temp.author = 'vue-element-admin'
-          createArticle(this.temp).then(() => {
+          addMember(this.temp).then((data) => {
+         this.temp.id = data.data.user
             this.list.unshift(this.temp)
             this.dialogFormVisible = false
             this.$notify({
-              title: '成功',
-              message: '创建成功',
+              title: 'Add Member',
+              message: 'Member was added successfully',
               type: 'success',
               duration: 2000
             })
           })
         }
       })
-    }, */
+    },
+
     handleUpdate(row) {
-      this.temp = Object.assign({}, row) // copy obj
-      this.temp.timestamp = new Date(this.temp.timestamp)
+      this.temp = Object.assign({}, row)
       this.dialogStatus = 'update'
       this.dialogFormVisible = true
       this.$nextTick(() => {
         this.$refs['dataForm'].clearValidate()
       })
     },
-/*     updateData() {
+        updateData() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
-          tempData.timestamp = +new Date(tempData.timestamp) // change Thu Nov 30 2017 16:41:05 GMT+0800 (CST) to 1512031311464
-          updateArticle(tempData).then(() => {
+          editMember(tempData).then(() => {
             for (const v of this.list) {
               if (v.id === this.temp.id) {
                 const index = this.list.indexOf(v)
@@ -262,22 +268,19 @@ export default {
             }
             this.dialogFormVisible = false
             this.$notify({
-              title: '成功',
-              message: '更新成功',
+              title: 'Update Member',
+              message: 'Member was updated successfully',
               type: 'success',
               duration: 2000
             })
           })
         }
       })
-    }, */
+    },
     handleDelete(row) {
          this.listLoading = true
       draftMember(row.id).then(response => {
-        /* this.list = response.data.data
-        this.total = response.data.total */
         this.handleModifyStatus(row, response.data.date)
-        // Just to simulate the time of the request
         setTimeout(() => {
           this.listLoading = false
         },200)

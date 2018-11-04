@@ -24,7 +24,6 @@ service.interceptors.request.use(
   },
   error => {
     // Do something with request error
-    console.log(error) // for debug
     Promise.reject(error)
   }
 )
@@ -71,7 +70,14 @@ service.interceptors.response.use(
         return retryOriginalRequest
       }
 
-    console.log('err' + error) // for debug
+    if(error.response.data.error.email) {
+        Message({
+            message: error.response.data.error.email,
+            type: 'error',
+            duration: 5 * 2000
+          })
+          return Promise.reject(error)
+    }
     Message({
       message: error.message,
       type: 'error',

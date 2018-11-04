@@ -1,7 +1,9 @@
 <template>
   <div class="components-container">
 
-    <el-button type="primary" icon="upload" style="position: absolute;bottom: 15px;margin-left: 40px;" @click="imagecropperShow=true">Change Avatar
+<pan-thumb v-if="state!='edit'" :image="image"/>
+
+    <el-button type="primary" icon="upload" style="position: absolute;bottom: 15px;margin-left: 40px;" @click="imagecropperShow=true">{{ state=='create'?'Add':'Change' }} Avatar
     </el-button>
 
     <image-cropper
@@ -19,26 +21,49 @@
 <script>
 import ImageCropper from '@/components/ImageCropper'
 import { uploadAvatar } from '@/api/members'
+import PanThumb from '@/components/PanThumb'
 export default {
   name: 'AvatarUpload',
-  components: { ImageCropper },
+   props: {
+    state: {
+      type: String,
+      default: 'update'
+    },
+    exImage:{
+        type: String,
+        default: ' '
+    }
+  },
+  components: { ImageCropper, PanThumb },
+  computed:{
+      image () {
+       return this.exImage
+      }
+  },
   data() {
     return {
       imagecropperShow: false,
-      imagecropperKey: 0,
+      imagecropperKey: 0
     }
   },
   methods: {
     cropSuccess(resData) {
       this.imagecropperShow = false
       this.imagecropperKey = this.imagecropperKey + 1
- let data = {
-     userId: this.$store.state.user.user.id,
-     img:resData.files.avatar
- }
-      uploadAvatar(data).then((data)=> {
-          this.$store.commit('SET_AVATAR', data.data.user.avatar)
-      })
+      if(this.state!='edit') {
+          this.image = resData.files.avatar
+          this.$emit('avatarAdded',resData.files.avatar)
+      }
+      else {
+    let data = {
+        userId: this.$store.state.user.user.id,
+        img:resData.files.avatar
+    }
+        uploadAvatar(data).then((data)=> {
+            this.$store.commit('SET_AVATAR', data.data.user.avatar)
+        })
+      }
+
     },
     close() {
       this.imagecropperShow = false

@@ -17,7 +17,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password',
+        'firstName','lastName', 'email', 'password','avatar'
     ];
     protected $dates = ['deleted_at'];
     /**
@@ -29,9 +29,9 @@ class User extends Authenticatable
         'password', 'remember_token',
     ];
 
-    public function teams()
+    public function team()
     {
-        return $this->belongsToMany('App\Team','user_team','user_id','team_id');
+        return $this->belongsTo('App\Team');
 
     }
 

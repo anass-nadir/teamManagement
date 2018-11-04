@@ -137,8 +137,9 @@ export default {
     member :{
         lname:"Last Name",
         fname: "First Name",
-        email:"email",
-        team:"Team"
+        email:"Email",
+        team:"Team",
+        password:"Password"
     }
   },
   errorLog: {

@@ -6,23 +6,26 @@
     <div style="position:relative;">
         <el-row :gutter="8">
       <el-col :span="6">
-      <pan-thumb :image="avatar" class="panThumb"/>
+      <pan-thumb :image="avatar!=null?avatar:''" class="panThumb"/>
        </el-col>
        <el-col :span="6">
-      <avatar-upload />
+      <avatar-upload :state="'edit'" />
        </el-col>
         </el-row>
       <mallki class-name="mallki-text" :text="user.firstName+' '+user.lastName"/>
    <el-form ref="dataForm" :rules="rules" :model="user" label-position="left" label-width="100px" style="width: 80%; margin-left:50px; padding-top:35px;">
 
-        <el-form-item :label="$t('table.member.fname')" class="progress-item" prop="firstName">
+        <el-form-item :label="$t('table.member.fname')" prop="firstName">
           <el-input v-model="user.firstName"/>
         </el-form-item>
-         <el-form-item :label="$t('table.member.lname')" class="progress-item" prop="lastName">
+         <el-form-item :label="$t('table.member.lname')" prop="lastName">
           <el-input v-model="user.lastName"/>
         </el-form-item>
-         <el-form-item :label="$t('table.member.email')" class="progress-item" prop="email">
+         <el-form-item :label="$t('table.member.email')" prop="email">
           <el-input v-model="user.email"/>
+        </el-form-item>
+         <el-form-item :label="$t('table.member.password')" prop="password">
+          <el-input v-model="user.password"/>
         </el-form-item>
 
       </el-form>
@@ -57,12 +60,20 @@ export default {
         callback()
       }
     }
+       const validatePassword = (rule, value, callback) => {
+      if (value.length < 6) {
+        callback(new Error('The password can not be less than 6 digits'))
+      } else {
+        callback()
+      }
+    }
     return {
        user:[],
 rules: {
         email: [{ required: true, trigger: 'submit', validator: validateMail }],
         firstName: [{ required: true, message: 'first name is required', trigger: 'submit' }],
-        lastName: [{ required: true, message: 'last name is required', trigger: 'submit' }]
+        lastName: [{ required: true, message: 'last name is required', trigger: 'submit' }],
+        password: [{ required: true, validator: validatePassword, trigger: 'submit' }]
       },
     }
   },
