@@ -39,3 +39,11 @@ export function destroyMember(userId) {
     })
 
   }
+
+  export function uploadAvatar(data) {
+    return request({
+      url: '/member/upload-avatar',
+      method: 'post',
+      data: data
+    })
+  }

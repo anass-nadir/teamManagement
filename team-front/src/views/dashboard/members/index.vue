@@ -1,5 +1,7 @@
 <template>
   <div class="dashboard-editor-container">
+       <el-row :gutter="8">
+           <el-col :xs="{span: 24}" :sm="{span: 12}" :md="{span: 12}" :lg="{span: 10}" :xl="{span: 10}" style="margin-bottom:30px;">
     <div class=" clearfix">
       <pan-thumb :image="avatar" style="float: left"> Your role:
         <span class="pan-info-roles">{{ roles }}</span>
@@ -9,6 +11,11 @@
         <span style="font-size:20px;padding-top:20px;display:inline-block;">Members's Dashboard</span>
       </div>
     </div>
+     </el-col>
+      <el-col :xs="{span: 24}" :sm="{span: 12}" :md="{span: 12}" :lg="{span: 10}" :xl="{span: 10}" style="margin-bottom:30px;">
+        <box-card/>
+      </el-col>
+    </el-row>
     <div>
       <img :src="emptyGif" class="emptyGif">
     </div>
@@ -18,10 +25,10 @@
 <script>
 import { mapGetters } from 'vuex'
 import PanThumb from '@/components/PanThumb'
-
+import BoxCard from '../admin/components/BoxCard'
 export default {
-  name: 'DashboardEditor',
-  components: { PanThumb },
+  name: 'DashboardMember',
+  components: { PanThumb,BoxCard },
   data() {
     return {
       emptyGif: 'https://wpimg.wallstcn.com/0e03b7da-db9e-4819-ba10-9016ddfdaed3'

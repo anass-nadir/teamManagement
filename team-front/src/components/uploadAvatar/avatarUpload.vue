@@ -1,8 +1,6 @@
 <template>
   <div class="components-container">
 
-    <pan-thumb :image="image"/>
-
     <el-button type="primary" icon="upload" style="position: absolute;bottom: 15px;margin-left: 40px;" @click="imagecropperShow=true">Change Avatar
     </el-button>
 
@@ -20,23 +18,27 @@
 
 <script>
 import ImageCropper from '@/components/ImageCropper'
-import PanThumb from '@/components/PanThumb'
-
+import { uploadAvatar } from '@/api/members'
 export default {
   name: 'AvatarUpload',
-  components: { ImageCropper, PanThumb },
+  components: { ImageCropper },
   data() {
     return {
       imagecropperShow: false,
       imagecropperKey: 0,
-      image: 'https://wpimg.wallstcn.com/577965b9-bb9e-4e02-9f0c-095b41417191'
     }
   },
   methods: {
     cropSuccess(resData) {
       this.imagecropperShow = false
       this.imagecropperKey = this.imagecropperKey + 1
-      this.image = resData.files.avatar
+ let data = {
+     userId: this.$store.state.user.user.id,
+     img:resData.files.avatar
+ }
+      uploadAvatar(data).then((data)=> {
+          this.$store.commit('SET_AVATAR', data.data.user.avatar)
+      })
     },
     close() {
       this.imagecropperShow = false

@@ -75,6 +75,7 @@ export default {
   login: {
     title: 'Login Form',
     logIn: 'Log in',
+    email:'Email',
     username: 'Username',
     password: 'Password',
     any: 'any',
@@ -114,7 +115,7 @@ export default {
     search: 'Search',
     add: 'Add',
     export: 'Export',
-    reviewer: 'reviewer',
+    members: 'Show Members',
     id: 'ID',
     date: 'Date',
     author: 'Author',

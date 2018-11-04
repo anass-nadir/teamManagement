@@ -141,5 +141,20 @@ class UsersController extends Controller
             'Content-Type' => 'application/json'
         ]);
     }
+    public function updateAvatar(Request $request) {
+
+        $userId = $request->get('userId');
+        $img = $request->get('img');
+
+        $member = User::findOrFail($userId);
+
+        $member->avatar = $img;
+        $member->update();
+
+        return response(['user'=>$member], 200)->withHeaders([
+            'Content-Type' => 'application/json'
+        ]);
+    }
+
 
 }

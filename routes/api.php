@@ -44,6 +44,8 @@ Route::group(['prefix' => 'user'], function () {
             Route::post('add-to-team', 'UsersController@attachMemberWithTeam');
             Route::get('get-by-team', 'UsersController@getMemberByTeam');
             Route::get('get-all', 'UsersController@getAll');
+            Route::post('upload-avatar', 'UsersController@updateAvatar');
+
 
         });
         Route::get('get-teams', 'UsersController@getTeams');

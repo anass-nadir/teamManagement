@@ -4,35 +4,41 @@
       <img src="https://wpimg.wallstcn.com/e7d23d71-cf19-4b90-a1cc-f56af8c0903d.png">
     </div>
     <div style="position:relative;">
+        <el-row :gutter="8">
+      <el-col :span="6">
       <pan-thumb :image="avatar" class="panThumb"/>
-      <mallki class-name="mallki-text" text="vue-element-admin"/>
-      <div style="padding-top:35px;" class="progress-item">
-        <span>Vue</span>
-        <el-progress :percentage="70"/>
-      </div>
-      <div class="progress-item">
-        <span>JavaScript</span>
-        <el-progress :percentage="18"/>
-      </div>
-      <div class="progress-item">
-        <span>Css</span>
-        <el-progress :percentage="12"/>
-      </div>
-      <div class="progress-item">
-        <span>ESLint</span>
-        <el-progress :percentage="100" status="success"/>
-      </div>
+       </el-col>
+       <el-col :span="6">
+      <avatar-upload />
+       </el-col>
+        </el-row>
+      <mallki class-name="mallki-text" :text="user.firstName+' '+user.lastName"/>
+   <el-form ref="dataForm" :rules="rules" :model="user" label-position="left" label-width="100px" style="width: 80%; margin-left:50px; padding-top:35px;">
+
+        <el-form-item :label="$t('table.member.fname')" class="progress-item" prop="firstName">
+          <el-input v-model="user.firstName"/>
+        </el-form-item>
+         <el-form-item :label="$t('table.member.lname')" class="progress-item" prop="lastName">
+          <el-input v-model="user.lastName"/>
+        </el-form-item>
+         <el-form-item :label="$t('table.member.email')" class="progress-item" prop="email">
+          <el-input v-model="user.email"/>
+        </el-form-item>
+
+      </el-form>
+
     </div>
   </el-card>
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
 import PanThumb from '@/components/PanThumb'
 import Mallki from '@/components/TextHoverEffect/Mallki'
+import { validateEmail } from '@/utils/validate'
+import AvatarUpload from '@/components/uploadAvatar/avatarUpload'
 
 export default {
-  components: { PanThumb, Mallki },
+  components: { PanThumb, Mallki,AvatarUpload },
 
   filters: {
     statusFilter(status) {
@@ -44,20 +50,30 @@ export default {
     }
   },
   data() {
-    return {
-      statisticsData: {
-        article_count: 1024,
-        pageviews_count: 1024
+      const validateMail = (rule, value, callback) => {
+      if (!validateEmail(value)) {
+        callback(new Error('Please enter a valid email'))
+      } else {
+        callback()
       }
+    }
+    return {
+       user:[],
+rules: {
+        email: [{ required: true, trigger: 'submit', validator: validateMail }],
+        firstName: [{ required: true, message: 'first name is required', trigger: 'submit' }],
+        lastName: [{ required: true, message: 'last name is required', trigger: 'submit' }]
+      },
     }
   },
   computed: {
-    ...mapGetters([
-      'name',
-      'avatar',
-      'roles'
-    ])
-  }
+    avatar () {
+        return this.$store.state.user.avatar
+    }
+  },
+  created(){
+        this.user = this.$store.state.user.user
+}
 }
 </script>
 

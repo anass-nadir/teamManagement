@@ -78,7 +78,7 @@ const user = {
 
           commit('SET_NAME', data.user.firstName+' '+data.user.lastName)
           commit('SET_USER', data.user)
-        //   commit('SET_AVATAR', data.avatar)
+          commit('SET_AVATAR', data.user.avatar)
         //   commit('SET_INTRODUCTION', data.introduction)
           resolve(response)
         }).catch(error => {

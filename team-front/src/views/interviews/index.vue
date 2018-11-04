@@ -8,6 +8,8 @@
       <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">{{ $t('table.search') }}</el-button>
       <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" v-permission="['admin']" @click="handleCreate">{{ $t('table.add') }}</el-button>
       <el-button v-waves :loading="downloadLoading" class="filter-item" type="primary" icon="el-icon-download" @click="handleDownload">{{ $t('table.export') }}</el-button>
+      <el-checkbox v-model="showMembers" v-if="checkPermission(['admin'])" class="filter-item" style="margin-left:15px;" @change="tableKey=tableKey+1">{{ $t('table.members') }}</el-checkbox>
+
     </div>
 
     <el-table
@@ -39,9 +41,9 @@
           <span>{{ scope.row.place }}</span>
         </template>
       </el-table-column>
-      <el-table-column v-if="checkPermission(['admin'])" :label="$t('table.interview.users')" align="left" width="200px">
+      <el-table-column v-if="checkPermission(['admin']) && showMembers" :label="$t('table.interview.users')" align="left" width="200px">
         <template slot-scope="scope">
-          <span v-for="(item,index) in scope.row.users" :key="index" style="display:inline-block">[{{ item.firstName }} {{ item.lastName }}]</span>
+          <span v-for="(item,index) in scope.row.users" :key="index" style="display:block">[{{ item.firstName }} {{ item.lastName }}]</span>
         </template>
       </el-table-column>
       <el-table-column :label="$t('table.status')" class-name="status-col" width="100px">
@@ -147,7 +149,8 @@ export default {
         place: [{ required: true, message: 'place is required', trigger: 'blur' }]
       },
       downloadLoading: false,
-      members:[]
+      members:[],
+      showMembers: false,
     }
   },
   created() {
