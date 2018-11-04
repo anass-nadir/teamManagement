@@ -5,6 +5,7 @@
     <el-row :gutter="8">
       <el-col :xs="{span: 24}" :sm="{span: 12}" :md="{span: 12}" :lg="{span: 6}" :xl="{span: 6}" style="margin-bottom:30px;">
         <box-card/>
+        <!-- <avatar-upload /> -->
       </el-col>
     </el-row>
 
@@ -13,12 +14,13 @@
 
 <script>
 import BoxCard from './components/BoxCard'
-
+import AvatarUpload from '@/components/uploadAvatar/avatarUpload'
 
 export default {
   name: 'DashboardAdmin',
   components: {
-    BoxCard
+    BoxCard,
+    AvatarUpload
   },
   data() {
     return {

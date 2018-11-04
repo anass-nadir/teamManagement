@@ -32,6 +32,8 @@ Route::group(['prefix' => 'user'], function () {
         Route::post('publish', 'InterviewsController@publish');
         Route::post('push-interview', 'InterviewsController@addInterview');
         Route::post('edit-interview', 'InterviewsController@updateInterview');
+        Route::get('get-by-member', 'InterviewsController@getByMember');
+
         });
 
         Route::group(['prefix' => 'member'], function () {

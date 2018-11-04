@@ -21,11 +21,11 @@ export default {
   },
   watch: {
     $route() {
-    //   this.getBreadcrumb()
+      this.getBreadcrumb()
     }
   },
   created() {
-    // this.getBreadcrumb()
+    this.getBreadcrumb()
   },
   methods: {
     generateTitle,

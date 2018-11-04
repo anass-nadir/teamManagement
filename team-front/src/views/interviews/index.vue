@@ -6,7 +6,7 @@
       <el-input :placeholder="$t('table.interview.subject')" v-model="listQuery.subject" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter"/>
 
       <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">{{ $t('table.search') }}</el-button>
-      <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" @click="handleCreate">{{ $t('table.add') }}</el-button>
+      <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" v-permission="['admin']" @click="handleCreate">{{ $t('table.add') }}</el-button>
       <el-button v-waves :loading="downloadLoading" class="filter-item" type="primary" icon="el-icon-download" @click="handleDownload">{{ $t('table.export') }}</el-button>
     </div>
 
@@ -39,7 +39,7 @@
           <span>{{ scope.row.place }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('table.interview.users')" align="left" width="200px">
+      <el-table-column v-if="checkPermission(['admin'])" :label="$t('table.interview.users')" align="left" width="200px">
         <template slot-scope="scope">
           <span v-for="(item,index) in scope.row.users" :key="index" style="display:inline-block">[{{ item.firstName }} {{ item.lastName }}]</span>
         </template>
@@ -49,7 +49,7 @@
           <el-tag :type="scope.row.deleted_at==null?'success':'info'">{{ scope.row.deleted_at==null? 'publish': 'draft' }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('table.actions')" align="center" width="230px" class-name="small-padding fixed-width">
+      <el-table-column v-if="checkPermission(['admin'])" :label="$t('table.actions')" align="center" width="230px" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button type="primary" size="mini"  @click="handleUpdate(scope.row)">{{ $t('table.edit') }}</el-button>
           <el-button v-if="scope.row.deleted_at!=null" size="mini" type="success" @click="handlePublishInterview(scope.row)">{{ $t('table.publish') }}
@@ -96,18 +96,19 @@
 </template>
 
 <script>
-import { fetchPage, draftInterview, destroyInterview, publishInterview, createInterview, editInterview } from '@/api/interviews'
+import { fetchPage, draftInterview, destroyInterview, publishInterview, createInterview, editInterview, getByMember } from '@/api/interviews'
 import waves from '@/directive/waves' // Waves directive
 import { parseTime } from '@/utils'
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
 import PickMember from '@/components/PickMember'
 import { fetchAll } from '@/api/members'
-
+import permission from '@/directive/permission/index.js'
+import checkPermission from '@/utils/permission'
 
 export default {
   name: 'Interviews',
   components: { Pagination, PickMember },
-  directives: { waves },
+  directives: { waves, permission },
   data() {
     return {
       tableKey: 0,
@@ -116,6 +117,7 @@ export default {
       listLoading: true,
       listQuery: {
         page: 1,
+        id:null,
         limit: 20,
         synthesis: undefined,
         place: undefined,
@@ -152,9 +154,11 @@ export default {
     this.getList()
   },
   methods: {
+      checkPermission,
     getList() {
       this.listLoading = true
-      fetchPage(this.listQuery).then(response => {
+      if(this.$store.getters.roles == 'admin') {
+ fetchPage(this.listQuery).then(response => {
         this.list = response.data.interviews.data
         this.total = response.data.interviews.total
 
@@ -163,6 +167,19 @@ export default {
           this.listLoading = false
         }, 600)
       })
+      } else {
+          this.listQuery.id = this.$store.state.user.user.id
+           getByMember(this.listQuery).then(response => {
+        this.list = response.data.interviews.data
+        this.total = response.data.interviews.total
+
+        // Just to simulate the time of the request
+        setTimeout(() => {
+          this.listLoading = false
+        }, 600)
+      })
+      }
+
     },
     handleFilter() {
       this.listQuery.page = 1

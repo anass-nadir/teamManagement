@@ -173,4 +173,57 @@ class InterviewsController extends Controller
         ]);
 
     }
+    public function getByMember(Request $request, Interview $interview)
+    {
+
+        $interviews = $interview->newQuery();
+
+        $limit = $request->get('limit');
+        $sort = $request->get('sort');
+        $subject = $request->get('subject');
+        $place = $request->get('place');
+        $synthesis = $request->get('synthesis');
+        $id = $request->get('id');
+
+
+        $interviews = $interviews->whereHas('users', function($query) use ($id) {
+                $query->whereUserId($id);
+            });
+
+
+
+        if($subject!=null) {
+
+            $interviews->where('subject','LIKE',"%{$subject}%");
+        }
+
+        if($place!=null) {
+
+            $interviews->where('place','LIKE',"%{$place}%");
+        }
+
+        if($synthesis!=null) {
+
+            $interviews->where('synthesis','LIKE',"%{$synthesis}%");
+        }
+
+        if ($sort=='-id') {
+
+            $interviews = $interviews->orderBy('id', 'desc')->withTrashed()->paginate($limit);
+
+            return response(['interviews'=>$interviews], 200)->withHeaders([
+                'Content-Type' => 'application/json'
+            ]);
+        }
+
+
+       $interviews = $interviews->withTrashed()->paginate($limit);
+
+
+        return response(['interviews'=>$interviews], 200)->withHeaders([
+            'Content-Type' => 'application/json'
+        ]);
+    }
+
+
 }

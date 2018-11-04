@@ -9,11 +9,11 @@ export function fetchPage(data) {
 
 }
 
-export function fetchArticle(id) {
+export function getByMember(data) {
   return request({
-    url: '/article/detail',
+    url: '/interview/get-by-member',
     method: 'get',
-    params: { id }
+    params: { id:data.id, page: data.page, limit:data.limit, synthesis:data.synthesis,subject:data.subject, place:data.place, sort:data.sort  }
   })
 }
 

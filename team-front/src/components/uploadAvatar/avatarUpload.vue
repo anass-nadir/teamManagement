@@ -1,9 +1,5 @@
 <template>
   <div class="components-container">
-    <code>This is based on
-      <a class="link-type" href="//github.com/dai-siki/vue-image-crop-upload"> vue-image-crop-upload</a>.
-      {{ $t('components.imageUploadTips') }}
-    </code>
 
     <pan-thumb :image="image"/>
 
@@ -27,7 +23,7 @@ import ImageCropper from '@/components/ImageCropper'
 import PanThumb from '@/components/PanThumb'
 
 export default {
-  name: 'AvatarUploadDemo',
+  name: 'AvatarUpload',
   components: { ImageCropper, PanThumb },
   data() {
     return {
