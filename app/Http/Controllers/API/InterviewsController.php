@@ -129,4 +129,48 @@ class InterviewsController extends Controller
         ]);
 
     }
+    public function updateInterview(Request $request) {
+
+        $rules = [
+            'subject' => 'required',
+            'place' => 'required',
+            'synthesis' =>'required',
+            "users"    => "required|array|min:1",
+            "users.*"  => "required|array|distinct|min:1"
+        ];
+        $inputs = $request->all();
+
+        $validator = Validator::make($inputs, $rules);
+        if ($validator->fails()) {
+            $errors = $validator->messages();
+            return response()->json(['error' => $errors], 400);
+        }
+        $subject = $request->get('subject');
+        $place = $request->get('place');
+        $synthesis = $request->get('synthesis');
+        $members = $request->get('users');
+        $id = $request->get('id');
+
+
+        $interview = Interview::findOrFail($id);
+
+        $interview->subject = $subject;
+        $interview->synthesis = $synthesis;
+        $interview->place = $place;
+
+
+        $interview->save();
+
+        foreach ($members as $member) {
+
+            $interview->users()->sync([$member['id']], false);
+
+        }
+
+
+        return response(['message'=>'success','interview'=>$interview->id], 200)->withHeaders([
+            'Content-Type' => 'application/json'
+        ]);
+
+    }
 }

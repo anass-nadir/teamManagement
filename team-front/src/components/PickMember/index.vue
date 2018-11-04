@@ -2,7 +2,7 @@
   <div class="dndList">
     <div style="width:48%" class="dndList-list">
       <h3>Click or Drag members</h3>
-      <draggable :list="filterList2" :options="{group:'article'}" @change="listChanged" class="dragArea">
+      <draggable :list="filterList2" :options="{group:'article'}" class="dragArea">
         <div v-for="element in filterList2" :key="element.id" class="list-complete-item">
           <div class="list-complete-item-handle2" @click="pushEle(element)"> [{{ element.firstName }}] {{ element.lastName }}</div>
         </div>
@@ -26,14 +26,22 @@
 
 <script>
 import draggable from 'vuedraggable'
-import { fetchAll } from '@/api/members'
+
 export default {
   components: { draggable },
-  data() {
-      return {
-          list2 :[],
-          list1: []
+   props: {
+    list1: {
+      type: Array,
+      default() {
+        return []
       }
+    },
+    list2: {
+      type: Array,
+      default() {
+        return []
+      }
+    }
   },
   computed: {
     filterList2() {
@@ -44,9 +52,6 @@ export default {
         return false
       })
     }
-  },
-  created() {
-      this.getList()
   },
   methods: {
     isNotInList1(v) {
@@ -71,17 +76,6 @@ export default {
     pushEle(ele) {
       this.list1.push(ele)
       this.$emit('memberAdded',ele)
-    },
-    getList() {
-      fetchAll().then(response => {
-        this.list2 = response.data.members
-      })
-    },
-    listChanged (evt) {
-        if(evt.added)
-        this.$emit('memberAdded',evt.added.element)
-         else if(evt.removed)
-          this.$emit('memberRemoved',evt.removed.element)
     }
   }
 }

@@ -47,3 +47,10 @@ export function destroyInterview(interviewId) {
       data
     })
   }
+  export function editInterview(data) {
+    return request({
+      url: '/interview/edit-interview',
+      method: 'post',
+      data
+    })
+  }

@@ -31,7 +31,7 @@ Route::group(['prefix' => 'user'], function () {
         Route::post('trash', 'InterviewsController@trash');
         Route::post('publish', 'InterviewsController@publish');
         Route::post('push-interview', 'InterviewsController@addInterview');
-
+        Route::post('edit-interview', 'InterviewsController@updateInterview');
         });
 
         Route::group(['prefix' => 'member'], function () {

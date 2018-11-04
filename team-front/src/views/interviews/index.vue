@@ -51,7 +51,7 @@
       </el-table-column>
       <el-table-column :label="$t('table.actions')" align="center" width="230px" class-name="small-padding fixed-width">
         <template slot-scope="scope">
-          <el-button type="primary" size="mini">{{ $t('table.edit') }}</el-button>
+          <el-button type="primary" size="mini"  @click="handleUpdate(scope.row)">{{ $t('table.edit') }}</el-button>
           <el-button v-if="scope.row.deleted_at!=null" size="mini" type="success" @click="handlePublishInterview(scope.row)">{{ $t('table.publish') }}
           </el-button>
           <el-button v-if="scope.row.deleted_at==null" size="mini" @click="handleDelete(scope.row)">{{ $t('table.draft') }}
@@ -82,11 +82,11 @@
       </el-form>
        </el-col>
         <el-col :span="12">
- <pick-member @memberAdded="memberAdded" @memberRemoved="memberRemoved" />
+ <pick-member :list2="members" :list1="temp.users" />
              </el-col>
       </el-row>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogFormVisible = false">{{ $t('table.cancel') }}</el-button>
+        <el-button @click="closeDialog">{{ $t('table.cancel') }}</el-button>
         <el-button type="primary" @click="dialogStatus==='create'?createData():updateData()">{{ $t('table.confirm') }}</el-button>
       </div>
     </el-dialog>
@@ -96,33 +96,18 @@
 </template>
 
 <script>
-import { fetchPage, draftInterview, destroyInterview, publishInterview, createInterview } from '@/api/interviews'
+import { fetchPage, draftInterview, destroyInterview, publishInterview, createInterview, editInterview } from '@/api/interviews'
 import waves from '@/directive/waves' // Waves directive
 import { parseTime } from '@/utils'
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
 import PickMember from '@/components/PickMember'
-const calendarTypeOptions = [
-  { key: 'CN', display_name: 'China' },
-  { key: 'US', display_name: 'USA' },
-  { key: 'JP', display_name: 'Japan' },
-  { key: 'EU', display_name: 'Eurozone' }
-]
+import { fetchAll } from '@/api/members'
 
-// arr to obj ,such as { CN : "China", US : "USA" }
-const calendarTypeKeyValue = calendarTypeOptions.reduce((acc, cur) => {
-  acc[cur.key] = cur.display_name
-  return acc
-}, {})
 
 export default {
   name: 'Interviews',
   components: { Pagination, PickMember },
   directives: { waves },
-  filters: {
-    typeFilter(type) {
-      return calendarTypeKeyValue[type]
-    }
-  },
   data() {
     return {
       tableKey: 0,
@@ -137,8 +122,6 @@ export default {
         subject: undefined,
         sort: '+id'
       },
-      importanceOptions: [1, 2, 3],
-      calendarTypeOptions,
       sortOptions: [{ label: 'ID Ascending', key: '+id' }, { label: 'ID Descending', key: '-id' }],
       statusOptions: ['published', 'draft'],
       temp: {
@@ -152,17 +135,17 @@ export default {
       dialogFormVisible: false,
       dialogStatus: '',
       textMap: {
-        update: 'Edit',
-        create: 'Create'
+        update: 'Edit Interview',
+        create: 'Create Interview'
       },
       dialogPvVisible: false,
-      pvData: [],
       rules: {
         subject: [{ required: true, message: 'subject is required', trigger: 'blur' }],
         synthesis: [{required: true, message: 'synthesis is required', trigger: 'blur' }],
         place: [{ required: true, message: 'place is required', trigger: 'blur' }]
       },
-      downloadLoading: false
+      downloadLoading: false,
+      members:[]
     }
   },
   created() {
@@ -216,19 +199,24 @@ export default {
         status: 'published'
       }
     },
-    handleCreate() {
-      this.resetTemp()
+    closeDialog() {
+        if(this.dialogStatus == 'update') {
+          this.getList()
+        }
+         this.dialogFormVisible = false
+    },
+    async handleCreate() {
+        this.listLoading = true
+    await  fetchAll().then(response => {
+        this.members = response.data.members
+        this.resetTemp()
       this.dialogStatus = 'create'
+      this.listLoading = false
       this.dialogFormVisible = true
       this.$nextTick(() => {
         this.$refs['dataForm'].clearValidate()
       })
-    },
-    memberAdded (member) {
-     this.temp.users.push(member)
-    },
-    memberRemoved (member) {
-        this.temp.users.indexOf(member) !== -1 && this.temp.users.splice(this.temp.users.indexOf(member), 1)
+      })
     },
     createData() {
       this.$refs['dataForm'].validate((valid) => {
@@ -256,21 +244,25 @@ export default {
         }
       })
     },
-    handleUpdate(row) {
+   async handleUpdate(row) {
+         this.listLoading = true
+    await  fetchAll().then(response => {
+        this.members = response.data.members
       this.temp = Object.assign({}, row) // copy obj
       this.temp.timestamp = new Date(this.temp.timestamp)
       this.dialogStatus = 'update'
       this.dialogFormVisible = true
+      this.listLoading = false
       this.$nextTick(() => {
         this.$refs['dataForm'].clearValidate()
       })
+    })
     },
-/*     updateData() {
+    updateData() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
-          tempData.timestamp = +new Date(tempData.timestamp) // change Thu Nov 30 2017 16:41:05 GMT+0800 (CST) to 1512031311464
-          updateArticle(tempData).then(() => {
+          editInterview(tempData).then(() => {
             for (const v of this.list) {
               if (v.id === this.temp.id) {
                 const index = this.list.indexOf(v)
@@ -280,20 +272,19 @@ export default {
             }
             this.dialogFormVisible = false
             this.$notify({
-              title: '成功',
-              message: '更新成功',
+              title: 'Update Interview',
+              message: 'Interview was updated successfully',
               type: 'success',
               duration: 2000
             })
           })
         }
       })
-    }, */
+    },
     handleDelete(row) {
          this.listLoading = true
       draftInterview(row.id).then(response => {
-        /* this.list = response.data.data
-        this.total = response.data.total */
+
         this.handleModifyStatus(row, response.data.date)
         // Just to simulate the time of the request
         setTimeout(() => {
