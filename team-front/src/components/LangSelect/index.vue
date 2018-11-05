@@ -5,7 +5,7 @@
     </div>
     <el-dropdown-menu slot="dropdown">
       <el-dropdown-item :disabled="language==='en'" command="en">English</el-dropdown-item>
-      <el-dropdown-item :disabled="language==='fr'" command="es">French</el-dropdown-item>
+      <el-dropdown-item :disabled="language==='fr'" command="fr">French</el-dropdown-item>
     </el-dropdown-menu>
   </el-dropdown>
 </template>

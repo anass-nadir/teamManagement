@@ -106,17 +106,6 @@ class UsersController extends Controller
         ]);
     }
 
-    public function getMemberByTeam(Request $request) {
-
-        $teamId = $request->get('teamId');
-
-        $users = User::members()->where('team_id', $teamId)->get();
-
-        return response(['members'=>$users], 200)->withHeaders([
-            'Content-Type' => 'application/json'
-        ]);
-
-    }
 
     public function getAll() {
 
@@ -170,7 +159,7 @@ class UsersController extends Controller
             'email' => $email,
             'password'=>bcrypt($password),
             'avatar' => $avatar,
-            'team_id' => $team
+            'team_id' => (int)$team
         ]);
         $user->save();
 
@@ -217,7 +206,8 @@ class UsersController extends Controller
         $user->email = $email;
         $user->password = bcrypt($password);
         $user->avatar = $avatar;
-        $user->team_id = $team;
+        if($team!==null)
+        $user->team_id = (int)$team;
         $user->save();
 
 

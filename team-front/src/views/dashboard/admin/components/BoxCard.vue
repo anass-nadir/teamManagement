@@ -27,6 +27,7 @@
          <el-form-item :label="$t('table.member.password')" prop="password">
           <el-input v-model="user.password"/>
         </el-form-item>
+        <el-button style="float: right;margin-bottom: 40px;" type="primary" @click="updateProfile">{{ $t('table.edit') }}</el-button>
 
       </el-form>
 
@@ -39,19 +40,10 @@ import PanThumb from '@/components/PanThumb'
 import Mallki from '@/components/TextHoverEffect/Mallki'
 import { validateEmail } from '@/utils/validate'
 import AvatarUpload from '@/components/uploadAvatar/avatarUpload'
-
+import { editMember } from '@/api/members'
 export default {
   components: { PanThumb, Mallki,AvatarUpload },
 
-  filters: {
-    statusFilter(status) {
-      const statusMap = {
-        success: 'success',
-        pending: 'danger'
-      }
-      return statusMap[status]
-    }
-  },
   data() {
       const validateMail = (rule, value, callback) => {
       if (!validateEmail(value)) {
@@ -82,8 +74,26 @@ rules: {
         return this.$store.state.user.avatar
     }
   },
-  created(){
+  created() {
         this.user = this.$store.state.user.user
+},
+
+methods:{
+         updateProfile() {
+      this.$refs['dataForm'].validate((valid) => {
+        if (valid) {
+          editMember(this.user).then(() => {
+          this.$store.commit('SET_USER', this.user)
+            this.$notify({
+              title: 'Update Profile',
+              message: 'Your Profile was updated successfully',
+              type: 'success',
+              duration: 2000
+            })
+          })
+        }
+      })
+    }
 }
 }
 </script>

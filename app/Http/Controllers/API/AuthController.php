@@ -39,9 +39,9 @@ class AuthController extends Controller
             // attempt to verify the credentials and create a token for the user
             if (!$token = JWTAuth::attempt($credentials)) {
                 return response([
-                    'status' => 'error',
+                    'status' => 'error-credentials',
                     'error' => 'Invalid Credentials.',
-                ], 400);
+                ], 403);
             }
         } catch (JWTException $e) {
             // something went wrong while attempting to encode the token

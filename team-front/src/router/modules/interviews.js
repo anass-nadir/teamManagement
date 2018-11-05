@@ -7,13 +7,13 @@ const interviews = {
         component: Layout,
         redirect: '/interviews/list',
         name:'interviews',
-        meta: { title: 'Interviews', icon: 'documentation' },
+        meta: { title: 'interviews', icon: 'documentation' },
         children: [
           {
             path: 'list',
             component: () => import('@/views/interviews/index'),
             name: 'list-interviews',
-            meta: { title: 'List Interviews', icon: 'documentation', noCache: true }
+            meta: { title: 'interviewsList', icon: 'documentation', noCache: true }
           }
         ]
 

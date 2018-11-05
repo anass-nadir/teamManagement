@@ -18,7 +18,7 @@ $ php artisan key:generate
 ```
 >## 1. Setup your database connection in your `.env` file
 
->## 2. Create a virtual host under dev.teamManagement.com 
+>## 2. Create a virtual host under the name: dev.teamManagement.com 
 
 ### If you're using nginx 
 ```sh
@@ -40,7 +40,7 @@ server {
     }
 }
 ```
-### If you choose another server_name or if you prefer just to use #php artisan serve make sure to update the BASE_URL here:
+### If you choose another server_name or if you prefer just to use #php artisan serve make sure to update the BASE_API here:
 
 ### ``` teamManagement/team-front/dev.env.js```
 ```sh
@@ -58,7 +58,7 @@ $ php artisan migrate --seed
 $ cd team-front
 $ npm install
 $ npm run build
-#if you want to use the localhost use the next lines: [make sure to update the BASE_API constant after the previous step]
+#if you want to use the artisan's serve use the next lines: [make sure to update the BASE_API constant after the previous step]
 $ php artisan serve
 > If you face some issues with the assets
 $ php -S localhost:8000 -t public
@@ -75,3 +75,4 @@ or
 email: anass.nadir@gmail.com
 password: 123456
 ```
+* Or try to connect with a member's account to see the difference

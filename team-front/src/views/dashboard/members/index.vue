@@ -3,11 +3,11 @@
        <el-row :gutter="8">
            <el-col :xs="{span: 24}" :sm="{span: 12}" :md="{span: 12}" :lg="{span: 10}" :xl="{span: 10}" style="margin-bottom:30px;">
     <div class=" clearfix">
-      <pan-thumb :image="avatar" style="float: left"> Your role:
-        <span class="pan-info-roles">{{ roles }}</span>
+      <pan-thumb :image="user.avatar" style="float: left"> Your role:
+        <span class="pan-info-roles">{{ user.roles }}</span>
       </pan-thumb>
       <div class="info-container">
-        <span class="display_name">{{ name }}</span>
+        <span class="display_name">{{ user.firstName+' '+user.lastName }}</span>
         <span style="font-size:20px;padding-top:20px;display:inline-block;">Members's Dashboard</span>
       </div>
     </div>
@@ -23,7 +23,6 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
 import PanThumb from '@/components/PanThumb'
 import BoxCard from '../admin/components/BoxCard'
 export default {
@@ -35,11 +34,9 @@ export default {
     }
   },
   computed: {
-    ...mapGetters([
-      'name',
-      'avatar',
-      'roles'
-    ])
+   user () {
+       return this.$store.state.user.user
+   }
   }
 }
 </script>

@@ -57,7 +57,7 @@ service.interceptors.response.use(
             fetchToken(response.token)
             fetchedToken = false
           }).catch((error) => {
-            store.commit('LogOut')
+            store.dispatch('LogOut')
             return Promise.reject(error)
           })
         }
@@ -70,11 +70,18 @@ service.interceptors.response.use(
         return retryOriginalRequest
       }
 
-    if(error.response.data.error.email) {
+   else if(error.response.data.error.email) {
         Message({
             message: error.response.data.error.email,
             type: 'error',
             duration: 5 * 2000
+          })
+          return Promise.reject(error)
+    } else if(error.response.data.status=='error-credentials') {
+        Message({
+            message: error.response.data.error,
+            type: 'error',
+            duration: 5 * 1000
           })
           return Promise.reject(error)
     }

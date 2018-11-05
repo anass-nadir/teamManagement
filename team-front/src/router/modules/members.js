@@ -7,13 +7,13 @@ const members = {
         component: Layout,
         redirect: '/members/list',
         name:'members',
-        meta: { title: 'Members', icon: 'peoples', roles:['admin'] },
+        meta: { title: 'members', icon: 'peoples', roles:['admin'] },
         children: [
           {
             path: 'list',
             component: () => import('@/views/members/index'),
             name: 'list-members',
-            meta: { title: 'List Members', icon: 'peoples', noCache: true }
+            meta: { title: 'membersList', icon: 'peoples', noCache: true }
           }
         ]
 
